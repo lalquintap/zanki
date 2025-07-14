@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionario Personal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Diccionario Personal</h1>
+    <form id="wordForm">
+        <input type="text" id="word" placeholder="Palabra" required/>
+        <textarea id="meaning" placeholder="Significado o uso" required></textarea>
+        <input type="text" id="source" placeholder="Fuente (ej: manga, libro...)" />
+        <textarea id="example" placeholder="Oración de ejemplo (opcional)"></textarea>
+        <button type="submit">Guardar Palabra</button>
+    </form>
+
+    <div id="entries"></div>
+    
+</body>
+<script src="app.js"></script>
+</html>
