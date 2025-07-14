@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +18,17 @@
 
     <div id="entries"></div>
     
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2>¿Eliminar palabra?</h2>
+            <p>Esta acción no se puede deshacer.</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-confirm" id="confirmDeleteBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 <script src="app.js"></script>
 </html>
