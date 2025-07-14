@@ -4,6 +4,7 @@
     --accent: #457b9d;
     --text: #1d3557;
     --light: #f1faee;
+    --error: #e63946;
 }
 
 body{
@@ -30,6 +31,9 @@ form{
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 2rem;
+    opacity:0;
+    transform: translateY(-10px);
+    animation: fadeInUp 0.4s ease forwards;
 }
 
 input, textarea, button{
@@ -51,6 +55,17 @@ button:hover{
     background-color: #365f77;
 }
 
+#cancelEditBtn{
+  background: #ccc;
+  color: #333;
+}
+
+.form-message{
+  color: var(--error);
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+}
+
 .entry{
     background-color: white;
     padding: 1.5rem;
@@ -59,6 +74,8 @@ button:hover{
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     position:relative;
+    transform: translateY(10px);
+    animation: fadeInUp 0.4s ease forwards;
 }
 
 .entry h3{
@@ -95,17 +112,33 @@ button:hover{
     background-color: #ccc;
 }
 
-.modal-overlay {
+@keyframes fadeInUp{
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal */
+    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
       background: rgba(0, 0, 0, 0.4);
-      display: none;
+      display: flex;
       justify-content: center;
       align-items: center;
       z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
     }
 
     .modal {
@@ -115,6 +148,14 @@ button:hover{
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       max-width: 400px;
       text-align: center;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+      opacity: 1;
     }
 
     .modal h2 {
@@ -146,3 +187,4 @@ button:hover{
       background: var(--accent);
       color: white;
     }
+    
