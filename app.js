@@ -1,3 +1,4 @@
+
     const form = document.getElementById('wordForm');
     const entriesDiv = document.getElementById('entries');
     const wordInput = document.getElementById('word');
@@ -7,8 +8,8 @@
     const formMessage = document.getElementById('formMessage');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const modalOverlay = document.getElementById('modalOverlay');
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
+    const modalContent = document.getElementById('modalContent');
+    
     let editIndex = null;
     let deleteIndex = null;
 
@@ -22,24 +23,10 @@
     };
 
     const loadEntries = () => {
-      const entries = JSON.parse(localStorage.getItem('dictionaryEntries')) || [];
+      const entries = getEntries();
       entriesDiv.innerHTML = '';
       entries.forEach((entry, index) => {
-        const div = document.createElement('div');
-        div.className = 'entry';
-        div.style.animationDelay = `${index * 50}ms`;
-        div.innerHTML = `
-          <div class="entry-buttons">
-            <button onclick="editEntry(${index})">Editar</button>
-            <button onclick="confirmDelete(${index})">Eliminar</button>
-          </div>
-          <h3>${entry.word}</h3>
-          <small>Agregada el ${formatDate(entry.date)}</small>
-          <p><strong>Significado:</strong> ${entry.meaning}</p>
-          ${entry.source ? `<p><strong>Fuente:</strong> ${entry.source}</p>` : ''}
-          ${entry.example ? `<p><strong>Ejemplo:</strong> ${entry.example}</p>` : ''}
-        `;
-        entriesDiv.appendChild(div);
+        entriesDiv.appendChild(createCard(entry, index));
       });
     };
 
@@ -50,38 +37,65 @@
       const meaning = meaningInput.value.trim();
       const source = sourceInput.value.trim();
       const example = exampleInput.value.trim();
-      if (!word || !meaning) return;       
-      
-      const entries = JSON.parse(localStorage.getItem('dictionaryEntries')) || [];
+      if (!word || !meaning) return;
+
+      const entries = getEntries();
       const existsIndex = entries.findIndex(e => e.word.toLowerCase() === word.toLowerCase());
-      if (editIndex === null && existsIndex !== -1){
+
+      if (editIndex === null && existsIndex !== -1) {
         formMessage.textContent = 'Esta palabra ya está guardada. Puedes editarla si deseas actualizarla.';
         return;
       }
 
       const newEntry = {
-          word,
-          meaning,
-          source,
-          example,
-          date: new Date().toISOString()
-        };
+        word,
+        meaning,
+        source,
+        example,
+        date: new Date().toISOString()
+      };
 
-        if (editIndex !== null) {
-          entries[editIndex] = newEntry;
-          editIndex = null;
-          cancelEditBtn.style.display = 'none';
-        } else {
-          entries.unshift(newEntry);
-        }
+      if (editIndex !== null) {
+        entries[editIndex] = newEntry;
+        editIndex = null;
+        cancelEditBtn.style.display = 'none';
+      } else {
+        entries.unshift(newEntry);
+      }
 
-        localStorage.setItem('dictionaryEntries', JSON.stringify(entries));
-        form.reset();
-        loadEntries();
+      localStorage.setItem('dictionaryEntries', JSON.stringify(entries));
+      form.reset();
+      loadEntries();
     });
 
+    function getEntries(){
+      return JSON.parse(localStorage.getItem('dictionaryEntries')) || [];
+    }
+    
+    function createCard(entry, index){
+      const div = document.createElement('div');
+        div.className = 'card';
+        div.style.animationDelay = `${index * 40}ms`;
+        div.innerHTML = `
+          <h3>${entry.word}</h3>
+          <small>${entry.source ? '📘 ' + entry.source : ''} · ${formatDate(entry.date)}</small>
+          <div class="card-buttons">
+            <button onclick="editEntry(${index})">Editar</button>
+            <button onclick="confirmDelete(${index})">Eliminar</button>
+            <button onclick="viewDetails(${index})">Ver</button>
+          </div>
+        `;
+
+        div.addEventListener('click', (e) => {
+          if(!e.target.closest('button')){
+            viewDetails(index);
+          }
+        });
+        return div;
+    }
+
     function editEntry(index) {
-      const entries = JSON.parse(localStorage.getItem('dictionaryEntries')) || [];
+      const entries = getEntries();
       const entry = entries[index];
       wordInput.value = entry.word;
       meaningInput.value = entry.meaning;
@@ -100,6 +114,40 @@
 
     function confirmDelete(index) {
       deleteIndex = index;
+      modalContent.innerHTML = `
+        <h2>¿Eliminar palabra?</h2>
+        <p>Esta acción no se puede deshacer.</p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+          <button class="btn-confirm" onclick="deleteEntry()">Eliminar</button>
+        </div>
+      `;
+      modalOverlay.classList.add('show');
+    }
+
+    function deleteEntry() {
+      if (deleteIndex !== null) {
+        const entries = getEntries();
+        entries.splice(deleteIndex, 1);
+        localStorage.setItem('dictionaryEntries', JSON.stringify(entries));
+        loadEntries();
+        closeModal();
+      }
+    }
+
+    function viewDetails(index) {
+      const entries = getEntries();
+      const entry = entries[index];
+      modalContent.innerHTML = `
+        <h2>${entry.word}</h2>
+        <p><strong>Significado:</strong> ${entry.meaning}</p>
+        ${entry.source ? `<p><strong>Fuente:</strong> ${entry.source}</p>` : ''}
+        ${entry.example ? `<p><strong>Ejemplo:</strong> ${entry.example}</p>` : ''}
+        <p><strong>Agregada:</strong> ${formatDate(entry.date)}</p>
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
+        </div>
+      `;
       modalOverlay.classList.add('show');
     }
 
@@ -108,14 +156,5 @@
       modalOverlay.classList.remove('show');
     }
 
-    confirmDeleteBtn.addEventListener('click', () => {
-      if (deleteIndex !== null) {
-        const entries = JSON.parse(localStorage.getItem('dictionaryEntries')) || [];
-        entries.splice(deleteIndex, 1);
-        localStorage.setItem('dictionaryEntries', JSON.stringify(entries));
-        loadEntries();
-        closeModal();
-      }
-    });
-
     window.onload = loadEntries;
+
